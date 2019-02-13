@@ -86,7 +86,7 @@ function removeLocalStorage(nombre)
 
 //Iniciamos el documento
 $(document).ready(function () {
-//Verifico que no tenga ningun mensaje y el tipo
+    //Verifico que no tenga ningun mensaje y el tipo
     var msg = getURLParameter('msg');
     var msg_tipo = getURLParameter('msg_tipo');
     if (typeof msg !== 'undefined' && typeof msg_tipo !== 'undefined')
@@ -95,18 +95,16 @@ $(document).ready(function () {
     }
 
 
-//Asignamos el valor a input id
+    //Asignamos el valor a input id
     $("#id").attr('value', getURLParameter('id'));
+    
     //Cargamos el menu principal
-    $.get(url_pv_admin + "pages/menu_principal.html")
+    $.get(url_pv + "Administrador/menu")
             .done(function (html) {
                 $("#menu_principal").html(html);
-            });
-    //Cargamos el menu de navegacion
-    $.get(url_pv + "Administrador/menu").done(function (respuesta) {
-        $("#menu_principal_navegacion").html(respuesta);
-    });
+            });            
 });
+
 //Al crear cualquier peticion de ajax muestra el modal
 $(document).ajaxStart(function () {
     $('#my_loader').modal({
