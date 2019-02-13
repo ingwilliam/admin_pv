@@ -7,8 +7,7 @@
             <file>file:/var/www/html/admin_pv/dist/js/verificar_token.js</file>
             <file>file:/var/www/html/admin_pv/pages/usuarios/list.html</file>
             <file>file:/var/www/html/admin_pv/pages/usuarios/form.html</file>
-            <file>file:/var/www/html/admin_pv/index.html</file>
-            <file>file:/var/www/html/admin_pv/cookie.html</file>
+            <file>file:/var/www/html/admin_pv/pages/seguridad/list.html</file>
         </group>
     </open-files>
 </project-private>

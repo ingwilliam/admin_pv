@@ -71,11 +71,11 @@
                                         <table class="table">
                                             <thead>
                                                 <tr id="cabecera">
-                                                    
+
                                                 </tr>
                                             </thead>
                                             <tbody id="cuerpo">
-                                                
+
                                             </tbody>
                                         </table>
 
@@ -125,25 +125,92 @@
 
         <script>
             $(document).ready(function () {
-                //Cargamos los perfiles
-                $.getJSON(url_pv + "Perfiles/select").done(function (respuesta) {                    
-                    $('#cabecera').append('<td>Modulos / Perfiles</td>');
-                    for (var i in respuesta) {
-                        $('#cabecera').append('<td>'+respuesta[i].nombre+'</td>');  
-                    }                    
-                });
-                //Cargamos los modulos
-                $.get(url_pv + "Modulos/seguridad").done(function (respuesta) {                    
-                    $("#cuerpo").html(respuesta);                                        
-                });
+                //Verifico si el token exite en el cliente y verifico que el token este activo en el servidor                
+                var token_actual = getLocalStorage(name_local_storage);
+
+                //Verifico si el token esta vacio, para enviarlo a que ingrese de nuevo
+                if ($.isEmptyObject(token_actual)) {
+                    location.href = '../../index.html?msg=Su sesión ha expirado, por favor vuelva a ingresar.&msg_tipo=danger';
+                } else
+                {
+                    //Cargamos los perfiles en la cabecera de la tabla
+                    $.ajax({
+                        type: 'GET',
+                        data: {"token": token_actual.token},
+                        url: url_pv + "Perfiles/select"
+                    }).done(function (data) {
+
+                        if (data == 'error_metodo')
+                        {
+                            notify("danger", "ok", "Seguridad:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                        } else
+                        {
+                            if (data == 'error')
+                            {
+                                notify("danger", "ok", "Seguridad:", "El usuario no se encuentra registrado, por favor registrarse");
+                            } else
+                            {
+                                var json = JSON.parse(data);
+
+                                if (json.length > 0) {
+                                    $('#cabecera').append('<td>Modulos / Perfiles</td>');
+                                    for (var i in json) {
+                                        $('#cabecera').append('<td>' + json[i].nombre + '</td>');
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    //Cargamos el html principal de seguridad                    
+                    $.ajax({
+                        type: 'GET',
+                        data: {"token": token_actual.token},
+                        url: url_pv + "Modulos/seguridad"
+                    }).done(function (data) {
+                        if (data == 'error_metodo')
+                        {
+                            notify("danger", "ok", "Seguridad:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                        } else
+                        {
+                            if (data == 'error')
+                            {
+                                notify("danger", "ok", "Seguridad:", "El usuario no se encuentra registrado, por favor registrarse");
+                            } else
+                            {
+                                $("#cuerpo").html(data);
+
+                                $(".select_permisos").change(function () {
+                                    GeneraPermiso(token_actual,$(this).val(), $(this).attr("title"), $(this).attr("dir"));
+                                });
+                            }
+                        }
+                    });
+                }
             });
 
             //Genera los permisos para cada perfil y modulo
-            function GeneraPermiso( permiso , modulo , perfil ){
-                $.post("index.php?controlador=Seguridad&accion=genPermiso",  {
-                    permiso: idPermiso ,
-                    modulo: idModulo ,
-                    perfil: idPerfil
+            function GeneraPermiso(token_actual,permiso, modulo, perfil) {
+                //Cargamos el html principal de seguridad                    
+                $.ajax({
+                    type: 'GET',
+                    data: {"token": token_actual.token,"permiso": permiso,"modulo": modulo,"perfil": perfil},
+                    url: url_pv + "Moduloperfilpermisos/new"
+                }).done(function (data) {
+                    if (data == 'error_metodo')
+                    {
+                        notify("danger", "ok", "Seguridad:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                    } else
+                    {
+                        if (data == 'ok')
+                        {
+                            notify("success", "ok", "Seguridad:", "Se creó el permiso con éxito.");
+                        } 
+                        else
+                        {
+                            notify("danger", "ok", "Seguridad:", "Se registro un error en el registro, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");                            
+                        }
+                    }
                 });
             }
 

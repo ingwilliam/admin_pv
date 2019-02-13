@@ -24,7 +24,7 @@ function form_edit(id)
 }
 
 /* Función para cargar alertas */
-function notify(xclass, xicon, xtitle, xmessage) {    
+function notify(xclass, xicon, xtitle, xmessage) {
     $.notify({
         icon: 'glyphicon glyphicon-' + xicon,
         title: '<strong>' + xtitle + '</strong>',
@@ -84,6 +84,34 @@ function removeLocalStorage(nombre)
     localStorage.removeItem(nombre);
 }
 
+//Funcion para lavidar permiso de lectura
+function permiso_lectura(token_actual, modulo)
+{
+    $.ajax({
+        type: 'POST',
+        data: {"token": token_actual.token, modulo: modulo},
+        url: url_pv + 'Session/permiso_lectura/'
+    }).done(function (data) {
+        if (data == 'error_metodo')
+        {
+            location.href='../index/index.html?msg=Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co&msg_tipo=danger';            
+        } else
+        {
+            if (data == 'error')
+            {
+                location.href='../index/index.html?msg=Se registro un error en la consulta, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co&msg_tipo=danger';                            
+            } 
+            else
+            {
+                if (data == 'acceso_denegado')
+                {
+                    location.href='../index/index.html?msg=Acceso denegado.&msg_tipo=danger';                            
+                }                 
+            }
+        }
+    });
+}
+
 //Iniciamos el documento
 $(document).ready(function () {
     //Verifico que no tenga ningun mensaje y el tipo
@@ -91,18 +119,18 @@ $(document).ready(function () {
     var msg_tipo = getURLParameter('msg_tipo');
     if (typeof msg !== 'undefined' && typeof msg_tipo !== 'undefined')
     {
-        notify(msg_tipo, "ok", "Login:", decodeURI(msg));        
+        notify(msg_tipo, "ok", "Login:", decodeURI(msg));
     }
 
 
     //Asignamos el valor a input id
     $("#id").attr('value', getURLParameter('id'));
-    
+
     //Cargamos el menu principal
     $.get(url_pv + "Administrador/menu")
             .done(function (html) {
                 $("#menu_principal").html(html);
-            });            
+            });
 });
 
 //Al crear cualquier peticion de ajax muestra el modal
