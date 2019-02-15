@@ -160,6 +160,7 @@
                 }
                 else
                 {
+                    //Verifica si el token actual tiene acceso de lectura
                     permiso_lectura(token_actual,"Usuarios");
                     
                     //Cargar datos en la tabla actual
@@ -203,7 +204,7 @@
                 {                
                     $.ajax({
                         type: 'DELETE',
-                        data: {"token": token_actual.token},
+                        data: {"token": token_actual.token,"modulo":"Usuarios"},
                         url: url_pv+'Usuarios/delete/' + id                  
                     }).done(function (data) {
                         if (data == 'ok')
@@ -213,7 +214,14 @@
                         } 
                         else
                         {
-                            notify("danger", "ok", "Login:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                            if (data == 'acceso_denegado')
+                            {
+                                notify("danger", "remove", "Usuario:", "Acceso denegado.");
+                            }
+                            else
+                            {
+                                notify("danger", "ok", "Usuario:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                            }                            
                         }
                     });                            
                 }

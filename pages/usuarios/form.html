@@ -186,7 +186,7 @@
         <script src='../../dist/js/main.js'></script>
         <script src='../../dist/js/jquery.loadJSON.js'></script>
         <script src='../../dist/js/verificar_token.js'></script>
-        
+
         <script>
                             $(document).ready(function () {
 
@@ -198,6 +198,8 @@
                                     location.href = '../../index.html?msg=Su sesión ha expirado, por favor vuelva a ingresar.&msg_tipo=danger';
                                 } else
                                 {
+                                    permiso_lectura(token_actual, "Usuarios");
+
                                     //Establesco la accion del formulario
                                     $('#form_validator').attr('action', url_pv + 'Usuarios/new');
 
@@ -209,12 +211,12 @@
                                     }).done(function (data) {
                                         if (data == 'error_metodo')
                                         {
-                                            notify("danger", "ok", "Login:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                                            notify("danger", "ok", "Usuarios:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
                                         } else
                                         {
                                             if (data == 'error')
                                             {
-                                                notify("danger", "ok", "Login:", "El usuario no se encuentra registrado, por favor registrarse");
+                                                notify("danger", "ok", "Usuarios:", "El usuario no se encuentra registrado, por favor registrarse");
                                             } else
                                             {
                                                 var json = JSON.parse(data);
@@ -237,12 +239,12 @@
 
                                         if (data == 'error_metodo')
                                         {
-                                            notify("danger", "ok", "Login:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                                            notify("danger", "ok", "Usuarios:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
                                         } else
                                         {
                                             if (data == 'error')
                                             {
-                                                notify("danger", "ok", "Login:", "El usuario no se encuentra registrado, por favor registrarse");
+                                                notify("danger", "ok", "Usuarios:", "El usuario no se encuentra registrado, por favor registrarse");
                                             } else
                                             {
                                                 var json = JSON.parse(data);
@@ -270,12 +272,12 @@
                                         }).done(function (data) {
                                             if (data == 'error_metodo')
                                             {
-                                                notify("danger", "ok", "Login:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                                                notify("danger", "ok", "Usuarios:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
                                             } else
                                             {
                                                 if (data == 'error')
                                                 {
-                                                    notify("danger", "ok", "Login:", "El usuario no se encuentra registrado, por favor registrarse");
+                                                    notify("danger", "ok", "Usuarios:", "El usuario no se encuentra registrado, por favor registrarse");
                                                 } else
                                                 {
                                                     var json = JSON.parse(data);
@@ -304,14 +306,13 @@
                                 //Verifico si el token esta vacio, para enviarlo a que ingrese de nuevo
                                 if ($.isEmptyObject(token_actual)) {
                                     location.href = '../../index.html?msg=Su sesión ha expirado, por favor vuelva a ingresar.&msg_tipo=danger';
-                                } 
-                                else
+                                } else
                                 {
                                     if ($("#perfil_" + id).prop('checked')) {
 
                                         $.ajax({
                                             type: 'POST',
-                                            data: {"token": token_actual.token,perfil: id, usuario: $("#id").attr('value')},
+                                            data: {"token": token_actual.token, perfil: id, usuario: $("#id").attr('value'), modulo: "Usuarios"},
                                             url: url_pv + 'Usuariosperfiles/new/'
                                         }).done(function (data) {
                                             if (data == 'error_metodo')
@@ -322,15 +323,19 @@
                                                 if (data == 'error')
                                                 {
                                                     notify("danger", "ok", "Usuario perfil:", "Se registro un error en el registro, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
-                                                } 
-                                                else
+                                                } else
                                                 {
-                                                    notify("success", "ok", "Usuario perfil:", "Se creó el perfil para el usuario actual con éxito.");                                                
+                                                    if (data == 'acceso_denegado')
+                                                    {
+                                                        notify("danger", "remove", "Usuario:", "No tiene permisos para editar información.");
+                                                    } else
+                                                    {
+                                                        notify("success", "ok", "Usuario perfil:", "Se creó el perfil para el usuario actual con éxito.");
+                                                    }
                                                 }
                                             }
-                                        });                                    
-                                    } 
-                                    else
+                                        });
+                                    } else
                                     {
                                         $.ajax({
                                             type: 'DELETE',
@@ -345,10 +350,15 @@
                                                 if (data == 'error')
                                                 {
                                                     notify("danger", "ok", "Usuario perfil:", "Se registro un error en el registro, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
-                                                } 
-                                                else
+                                                } else
                                                 {
-                                                    notify("success", "ok", "Usuario perfil:", "Se elimino el perfil para el usuario actual con éxito.");                                                
+                                                    if (data == 'acceso_denegado')
+                                                    {
+                                                        notify("danger", "remove", "Usuario:", "No tiene permisos para editar información.");
+                                                    } else
+                                                    {
+                                                        notify("success", "ok", "Usuario perfil:", "Se elimino el perfil para el usuario actual con éxito.");
+                                                    }
                                                 }
                                             }
                                         });
@@ -360,35 +370,41 @@
                             function cargar_perfiles(token_actual) {
                                 $.ajax({
                                     type: 'GET',
-                                    data: {"token": token_actual.token},
+                                    data: {"token": token_actual.token, "modulo": 'Usuarios'},
                                     url: url_pv + 'Perfiles/select_user/' + $("#id").attr('value')
                                 }).done(function (data) {
                                     if (data == 'error_metodo')
                                     {
-                                        notify("danger", "ok", "Login:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                                        notify("danger", "ok", "Usuarios:", "Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
                                     } else
                                     {
                                         if (data == 'error')
                                         {
-                                            notify("danger", "ok", "Login:", "El usuario no se encuentra registrado, por favor registrarse");
+                                            notify("danger", "ok", "Usuarios:", "El usuario no se encuentra registrado, por favor registrarse");
                                         } else
                                         {
-                                            var html = '';
+                                            if (data == 'acceso_denegado')
+                                            {
+                                                notify("danger", "remove", "Usuario:", "No tiene permisos para editar información.");
+                                            } else
+                                            {
+                                                var html = '';
 
-                                            var json = JSON.parse(data);
-                                            if (json.length > 0) {
-                                                $.each(json, function (index, array) {
-                                                    var checked = "";
+                                                var json = JSON.parse(data);
+                                                if (json.length > 0) {
+                                                    $.each(json, function (index, array) {
+                                                        var checked = "";
 
-                                                    if (array.checked != null)
-                                                    {
-                                                        checked = 'checked="checked"';
-                                                    }
-                                                    html = html + '<div class="col-md-4"><div class="checkbox"><label><input id="perfil_' + array['id'] + '" onclick="guardar_perfil(' + array['id'] + ')" type="checkbox" ' + checked + ' value="' + array['id'] + '">' + array['nombre'] + '</label></div></div>';
-                                                });
+                                                        if (array.checked != null)
+                                                        {
+                                                            checked = 'checked="checked"';
+                                                        }
+                                                        html = html + '<div class="col-md-4"><div class="checkbox"><label><input id="perfil_' + array['id'] + '" onclick="guardar_perfil(' + array['id'] + ')" type="checkbox" ' + checked + ' value="' + array['id'] + '">' + array['nombre'] + '</label></div></div>';
+                                                    });
+                                                }
+
+                                                $('#perifiles').html(html);
                                             }
-
-                                            $('#perifiles').html(html);
                                         }
                                     }
                                 });
@@ -469,7 +485,7 @@
                                         $.ajax({
                                             type: 'POST',
                                             url: $form.attr('action'),
-                                            data: $form.serialize() + "&token=" + token_actual.token
+                                            data: $form.serialize() + "&modulo=Usuarios&token=" + token_actual.token
                                         }).done(function (result) {
                                             if (result == 'error_registro')
                                             {
@@ -486,17 +502,23 @@
                                                         notify("danger", "ok", "Usuarios:", "Se registro un error, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
                                                     } else
                                                     {
-                                                        if (isNaN(result)) {
-                                                            notify("danger", "ok", "Usuarios:", "Se registro un error, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                                                        if (result == 'acceso_denegado')
+                                                        {
+                                                            notify("danger", "remove", "Usuario:", "No tiene permisos para editar información.");
                                                         } else
                                                         {
-                                                            //Asigno el valor id al hidden 
-                                                            $("#id").attr('value', result);
-                                                            //Cargar los perfiles del usuario actual
-                                                            cargar_perfiles(token_actual);
-                                                            //Cargo el popup y el boton de perfiles
-                                                            $("#perfiles").css("display", "block");
-                                                            notify("success", "ok", "Usuarios:", "Se creó el usuario con éxito.");
+                                                            if (isNaN(result)) {
+                                                                notify("danger", "ok", "Usuarios:", "Se registro un error, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                                                            } else
+                                                            {
+                                                                //Asigno el valor id al hidden 
+                                                                $("#id").attr('value', result);
+                                                                //Cargar los perfiles del usuario actual
+                                                                cargar_perfiles(token_actual);
+                                                                //Cargo el popup y el boton de perfiles
+                                                                $("#perfiles").css("display", "block");
+                                                                notify("success", "ok", "Usuarios:", "Se creó el usuario con éxito.");
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -507,7 +529,7 @@
                                         $.ajax({
                                             type: 'PUT',
                                             url: url_pv + 'Usuarios/edit/' + $("#id").attr('value'),
-                                            data: $form.serialize() + "&token=" + token_actual.token
+                                            data: $form.serialize() + "&modulo=Usuarios&token=" + token_actual.token
                                         }).done(function (result) {
                                             if (result == 'error_registro')
                                             {
@@ -524,11 +546,18 @@
                                                         notify("danger", "ok", "Usuarios:", "Se registro un error, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
                                                     } else
                                                     {
-                                                        if (isNaN(result)) {
-                                                            notify("danger", "ok", "Usuarios:", "Se registro un error, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                                                        if (result == 'acceso_denegado')
+                                                        {
+                                                            notify("danger", "remove", "Usuario:", "No tiene permisos para editar información.");
                                                         } else
                                                         {
-                                                            notify("info", "ok", "Usuarios:", "Se edito el usuario con éxito.");
+                                                            if (isNaN(result))
+                                                            {
+                                                                notify("danger", "ok", "Usuarios:", "Se registro un error, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co");
+                                                            } else
+                                                            {
+                                                                notify("info", "ok", "Usuarios:", "Se edito el usuario con éxito.");
+                                                            }
                                                         }
                                                     }
                                                 }
