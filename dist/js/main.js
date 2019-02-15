@@ -94,19 +94,50 @@ function permiso_lectura(token_actual, modulo)
     }).done(function (data) {
         if (data == 'error_metodo')
         {
-            location.href='../index/index.html?msg=Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co&msg_tipo=danger';            
+            location.href = '../index/index.html?msg=Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co&msg_tipo=danger';
         } else
         {
             if (data == 'error')
             {
-                location.href='../index/index.html?msg=Se registro un error en la consulta, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co&msg_tipo=danger';                            
-            } 
-            else
+                location.href = '../index/index.html?msg=Se registro un error en la consulta, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co&msg_tipo=danger';
+            } else
             {
                 if (data == 'acceso_denegado')
                 {
-                    location.href='../index/index.html?msg=Acceso denegado.&msg_tipo=danger';                            
-                }                 
+                    location.href = '../index/index.html?msg=Acceso denegado.&msg_tipo=danger';
+                }
+            }
+        }
+    });
+}
+
+//Logaut
+function logout()
+{
+    //Verifico si el token exite en el cliente y verifico que el token este activo en el servidor
+    //Si el token no esta activo o se presenta un error se elimina la variable del session storage
+    var token_actual = getLocalStorage(name_local_storage);
+
+    $.ajax({
+        type: 'POST',
+        data: {"token": token_actual.token},
+        url: url_pv + 'Session/cerrar_session/'
+    }).done(function (data) {
+        if (data == 'error_metodo')
+        {
+            location.href = '../index/index.html?msg=Se registro un error en el método, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co&msg_tipo=danger';
+        } else
+        {
+            if (data == 'error')
+            {
+                location.href = '../index/index.html?msg=Se registro un error en la consulta, comuníquese con la mesa de ayuda soporte.convocatorias@scrd.gov.co&msg_tipo=danger';
+            } else
+            {
+                if (data == 'ok')
+                {
+                    removeLocalStorage(name_local_storage)
+                    location.href = '../../index.html?msg=Cerro su sesión con éxito.&msg_tipo=success';
+                }
             }
         }
     });
@@ -122,15 +153,24 @@ $(document).ready(function () {
         notify(msg_tipo, "ok", "Login:", decodeURI(msg));
     }
 
-
     //Asignamos el valor a input id
     $("#id").attr('value', getURLParameter('id'));
 
-    //Cargamos el menu principal
-    $.get(url_pv + "Administrador/menu")
-            .done(function (html) {
-                $("#menu_principal").html(html);
-            });
+
+    //Verifico si el token exite en el cliente y verifico que el token este activo en el servidor
+    //Si el token no esta activo o se presenta un error se elimina la variable del session storage
+    var token_actual = getLocalStorage(name_local_storage);
+    if ((token_actual != null) || (token_actual != "") || (token_actual != "undefined"))
+    {
+        //Cargamos el menu principal
+        $.ajax({
+            type: 'POST',
+            data: {"token": token_actual.token},
+            url: url_pv + 'Administrador/menu'
+        }).done(function (data) {
+                $("#menu_principal").html(data);            
+        });
+    }
 });
 
 //Al crear cualquier peticion de ajax muestra el modal
